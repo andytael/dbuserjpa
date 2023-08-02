@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: dbuserrepo
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect
+        format_sql: true
+        show_sql: true
+
+  datasource:
+    url: jdbc:oracle:thin:@//localhost:1521/ORCLPDB1
+    username: atael
+    password: Welcome1234##
+    driver-class-name: oracle.jdbc.OracleDriver
+    type: oracle.ucp.jdbc.PoolDataSource
+    oracleucp:
+      connection-factory-class-name: oracle.jdbc.pool.OracleDataSource
+      connection-pool-name: CustomerConnectionPool
+      initial-pool-size: 15
+      min-pool-size: 10
+      max-pool-size: 30
