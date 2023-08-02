@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
-public class DbuserrepoApplication {
+public class DbUserRepoApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DbuserrepoApplication.class, args);
+        SpringApplication.run(DbUserRepoApplication.class, args);
     }
 
 
