@@ -2,7 +2,6 @@ package com.example.dbuserjpa.userdetailservice;
 
 import com.example.dbuserjpa.model.SecurityUser;
 import com.example.dbuserjpa.repository.UserRepository;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,19 +13,18 @@ public class JpaUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     public JpaUserDetailsService(UserRepository userRepository) {
-        System.out.println("Nisse");
+        System.out.println("DEBUG: Got UserRepository");
         this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        SecurityUser user =
-        userRepository
+        SecurityUser user = userRepository
                 .findByUsername(username)
                 .map(SecurityUser::new)
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found: " + username));
-        System.out.println(user.getUsername() + " " + user.getPassword() + " " + user.getAuthorities());
+        System.out.println("DEBUG: " + user.getUsername() + " " + user.getPassword() + " " + user.getAuthorities());
         return user;
     }
 }

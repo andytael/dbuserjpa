@@ -13,13 +13,13 @@ public class DbUserRepoController {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/api/pingsecureuser")
+    @GetMapping("/api/pinguser")
     public String pingSecureUser() {
         return "Secure User Ping Pong!";
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/api/pingsecureadmin")
+    // @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/api/pingadmin")
     public String pingSecureAdmin() {
         return "Secure Admin Ping Pong!";
     }
