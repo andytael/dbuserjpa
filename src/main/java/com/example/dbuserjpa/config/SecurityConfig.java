@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @EnableMethodSecurity
 public class SecurityConfig {
 
@@ -37,19 +37,18 @@ public class SecurityConfig {
                 .build();
     }
     */
+
     @Bean
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
+        System.out.println("apiSecurityFilterChain");
         return http
                 .securityMatcher("/api/**")
-                .authorizeHttpRequests(auth -> {
-                    auth.anyRequest().authenticated();
-                })
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .userDetailsService(jpaUserDetailsService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(withDefaults())
                 .build();
     }
-
 
     @Bean
     PasswordEncoder passwordEncoder() {
