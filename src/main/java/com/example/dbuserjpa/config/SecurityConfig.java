@@ -3,6 +3,7 @@ package com.example.dbuserjpa.config;
 import com.example.dbuserjpa.userdetailservice.JpaUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -10,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -24,23 +26,25 @@ public class SecurityConfig {
         this.jpaUserDetailsService = jpaUserDetailsService;
     }
 
-    /*
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeRequests(auth -> auth
-                        .Matchers("/ping/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/ping/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/**").hasAnyRole("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/error/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(jpaUserDetailsService)
                 .httpBasic(withDefaults())
+                .csrf(CsrfConfigurer::disable)
                 .build();
     }
-    */
 
+/*
     @Bean
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("apiSecurityFilterChain");
         return http
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
@@ -49,6 +53,7 @@ public class SecurityConfig {
                 .httpBasic(withDefaults())
                 .build();
     }
+*/
 
     @Bean
     PasswordEncoder passwordEncoder() {
