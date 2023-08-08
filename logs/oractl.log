@@ -1,0 +1,3 @@
+15:34:25.238 [main] [34mINFO [0;39m [36mo.s.s.c.s.ShellApplication[0;39m - Starting AOT-processed ShellApplication using Java 17.0.5 with PID 89695 (/Users/atael/bin/oractl started by atael in /Users/atael/IdeaProjects/dbuserjpa) 
+15:34:25.239 [main] [34mINFO [0;39m [36mo.s.s.c.s.ShellApplication[0;39m - The following 1 profile is active: "obaas" 
+15:34:25.466 [main] [34mINFO [0;39m [36mo.s.s.c.s.ShellApplication[0;39m - Started ShellApplication in 0.303 seconds (process running for 0.387) 

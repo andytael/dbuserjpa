@@ -18,7 +18,7 @@ public class DbUserRepoController {
         return "Secure User Ping Pong!";
     }
 
-    // @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/api/pingadmin")
     public String pingSecureAdmin() {
         return "Secure Admin Ping Pong!";

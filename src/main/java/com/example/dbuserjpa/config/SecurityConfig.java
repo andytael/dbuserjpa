@@ -3,20 +3,25 @@ package com.example.dbuserjpa.config;
 import com.example.dbuserjpa.userdetailservice.JpaUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity(debug = false)
 @EnableMethodSecurity
 public class SecurityConfig {
 
@@ -45,6 +50,31 @@ public class SecurityConfig {
 */
 
     @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/ping").permitAll()
+                        .requestMatchers("/error/**").permitAll()
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .httpBasic(withDefaults())
+                .userDetailsService(jpaUserDetailsService)
+                .build();
+    }
+/*
+    @Bean
+    public InMemoryUserDetailsManager users() {
+        return new InMemoryUserDetailsManager(
+                User.withUsername("atael")
+                        .password("{noop}password")
+                        .authorities("read")
+                        .build()
+        );
+    }
+*/
+    /*
+    @Bean
 	SecurityFilterChain SecurityFilterChain(HttpSecurity http) throws Exception {
 		return http
 				.securityMatcher(new AntPathRequestMatcher("/api/**"))
@@ -55,7 +85,7 @@ public class SecurityConfig {
 				.httpBasic(withDefaults())
 				.build();
 	}
-
+*/
 /*
     @Bean
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
