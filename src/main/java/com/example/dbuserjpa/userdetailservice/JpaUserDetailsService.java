@@ -13,7 +13,6 @@ public class JpaUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     public JpaUserDetailsService(UserRepository userRepository) {
-        System.out.println("DEBUG: Got UserRepository");
         this.userRepository = userRepository;
     }
 

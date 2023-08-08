@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.example.dbuserjpa.model.User;
+import com.example.dbuserjpa.model.Users;
 import com.example.dbuserjpa.repository.UserRepository;
 
 @SpringBootApplication
@@ -19,9 +19,9 @@ public class DbUserRepoApplication {
     @Bean
     CommandLineRunner commandLineRunner(UserRepository users, PasswordEncoder encoder) {
         return args -> {
-            // users.save(User.withUsername("user").password(encoder.encode("user")).roles("USER").build();
-            users.save(new User("user", encoder.encode("password"), "ROLE_USER"));
-            users.save(new User("admin", encoder.encode("password"), "ROLE_USER,ROLE_ADMIN"));
+            users.save(new Users("obaas-user", encoder.encode("password"), "ROLE_USER"));
+            users.save(new Users("obaas-admin", encoder.encode("password"), "ROLE_USER,ROLE_ADMIN"));
         };
+        //TODO: Get pwd from configuration mgmt (ansible) images_build playbook supplied by user/installer
     }
 }

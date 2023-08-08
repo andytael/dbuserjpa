@@ -1,11 +1,11 @@
 package com.example.dbuserjpa.repository;
 
-import com.example.dbuserjpa.model.User;
+import com.example.dbuserjpa.model.Users;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 
-public interface UserRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends CrudRepository<Users, Long> {
 
-    Optional<User> findByUsername(String username);
+    Optional<Users> findByUsername(String username);
 }

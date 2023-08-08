@@ -3,7 +3,7 @@ spring:
     name: dbuserrepo
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.OracleDialect
@@ -12,7 +12,7 @@ spring:
 
   datasource:
     url: jdbc:oracle:thin:@//localhost:1521/ORCLPDB1
-    username: atael
+    username: system[user_repo]
     password: Welcome1234##
     driver-class-name: oracle.jdbc.OracleDriver
     type: oracle.ucp.jdbc.PoolDataSource
@@ -23,4 +23,9 @@ spring:
       min-pool-size: 10
       max-pool-size: 30
 
-
+  liquibase:
+    change-log: classpath:db/changelog/controller.yaml
+    url: jdbc:oracle:thin:@//localhost:1521/ORCLPDB1
+    user: SYSTEM
+    password: Welcome1234##
+    enabled: ${LIQUIBASE_ENABLED:true}
