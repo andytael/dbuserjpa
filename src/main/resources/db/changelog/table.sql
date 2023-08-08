@@ -1,11 +1,11 @@
 -- liquibase formatted sql
 
---changeset atael:x
+--changeset atael:aa runAlways:true
 --preconditions onFail:MARK_RAN onerror:MARK_RAN
 --precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM USER_REPO.USERS WHERE 1=2
 DROP TABLE USER_REPO.USERS;
 
---changeset atael:y
+--changeset atael:bb runAlways:true
 CREATE TABLE USER_REPO.USERS
 (
     USER_ID NUMBER GENERATED ALWAYS AS IDENTITY (START WITH 1 CACHE 20),
