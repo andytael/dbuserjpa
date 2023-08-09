@@ -32,7 +32,7 @@ public class DbUserRepoController {
 
     // Get all users
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/accounts")
+    @GetMapping("/users")
     public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
@@ -63,7 +63,7 @@ public class DbUserRepoController {
     curl -u obaas-admin:password -i -X DELETE http://localhost:8080/user/{id}
     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/user/{id}")
+    @DeleteMapping("/userid/{id}")
     public ResponseEntity<HttpStatus> deleteUserById(@PathVariable("id") long id) {
         try {
             userRepository.deleteById(id);
