@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 
--- changeset nisse:inherit_system endDelimiter:/
+-- changeset nisse:inherit_system endDelimiter:/ runAlways:true
 DECLARE
     l_conn_user VARCHAR2(255);
     l_user      VARCHAR2(255);
