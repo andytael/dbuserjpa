@@ -1,4 +1,4 @@
-package com.example.dbuserjpa.userdetailservice;
+package com.example.dbuserjpa.service;
 
 import com.example.dbuserjpa.model.SecurityUser;
 import com.example.dbuserjpa.repository.UserRepository;
