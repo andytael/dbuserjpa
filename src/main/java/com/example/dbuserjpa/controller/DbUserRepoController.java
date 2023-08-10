@@ -2,14 +2,15 @@ package com.example.dbuserjpa.controller;
 
 import com.example.dbuserjpa.model.Users;
 import com.example.dbuserjpa.repository.UserRepository;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,13 +30,27 @@ public class DbUserRepoController {
     public DbUserRepoController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+    public record Userinfo (String username, String password) {
+    }
 
     @GetMapping("/ping")
     public String ping() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         System.out.println("DEBUG: /users Username : " + securityContext.getAuthentication().getName());
-        System.out.println("DEBUG: /users Roles : " + securityContext.getAuthentication().getAuthorities());
+        System.out.println("DEBUG: /users Authorities : " + securityContext.getAuthentication().getAuthorities());
+        System.out.println("DEBUG: /users Details : " + securityContext.getAuthentication().getDetails());
         return "Ping Pong!";
+    }
+
+    /* Connect
+    curl -i -u obaas-admin:password  http://localhost:8080/connect
+
+    http -a obaas-user:password :8080/connect
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/connect")
+    public ResponseEntity connect () {
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     /* Get all users
@@ -47,9 +62,6 @@ public class DbUserRepoController {
     @GetMapping("/users")
     public List<Users> getAllUsers() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        System.out.println("DEBUG: /users Username : " + securityContext.getAuthentication().getName());
-        System.out.println("DEBUG: /users Authorities : " + securityContext.getAuthentication().getAuthorities());
-        System.out.println("DEBUG: /users Details : " + securityContext.getAuthentication().getDetails());
         return userRepository.findAll();
     }
 
@@ -63,10 +75,9 @@ public class DbUserRepoController {
     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/user")
-    public ResponseEntity<Users> createUser(@RequestBody Users user) {
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    public ResponseEntity<Users> createUser(@RequestBody Users user, StandardPasswordEncoder encoder) {
         try {
-            Users _user =userRepository.save(new Users(
+            Users _user = userRepository.save(new Users(
                     user.getUsername(),
                     encoder.encode(user.getPassword()),
                     user.getRoles()
@@ -77,20 +88,43 @@ public class DbUserRepoController {
         }
     }
 
-    /* Change Password
+    /* Change Password - Admin user can change the password on anyone, user can only change it's own password
 
+    curl -u obaas-admin:password  -i -X PUT \
+      -H 'Content-Type: application/json' \
+      -d '{"username": "obaas-admin", "password": "newpassword"}' \
+      http://localhost:8080/userpwd
+
+    http -a obaas-admin:password PUT :8080/userpwd username=obaas-admin password=andy
     */
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PutMapping("/userpwd")
-    public ResponseEntity<Users> changePassword(@RequestBody String username, String password) {
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        try {
-            Optional<Users> _user = userRepository.findByUsername(username);
+    public ResponseEntity<Users> changePassword(@RequestBody Userinfo userInfo, StandardPasswordEncoder encoder) {
 
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        // Check if the user is a user with ROLE_ADMIN
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        boolean isAdminUser = false;
+        for (GrantedAuthority role : securityContext.getAuthentication().getAuthorities()) {
+            if (role.getAuthority().contains("ROLE_ADMIN")) {
+                isAdminUser = true;
+            }
+        }
+
+        // If the username of the authenticated user matches the requestbody username or if it is an user with ROLE_ADMIN
+        if ((userInfo.username().compareTo(securityContext.getAuthentication().getName()) == 0) || isAdminUser) {
+            try {
+                Optional<Users> _user = userRepository.findByUsername(userInfo.username());
+                _user.get().setPassword(encoder.encode(userInfo.password()));
+                userRepository.saveAndFlush(_user.get());
+                return new ResponseEntity(HttpStatus.OK);
+            } catch (Exception e) {
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
     }
+
 
     /* Delete a User By Id
     curl -u obaas-admin:password -i -X DELETE http://localhost:8080/userid/{id}
@@ -118,18 +152,6 @@ public class DbUserRepoController {
     @GetMapping("/api/pingadmin")
     public String pingSecureAdmin() {
         return "Secure Admin Ping Pong!";
-    }
-
-    @PreAuthorize("hasRole('USER')")
-    @GetMapping("/api/user")
-    public String user() {
-        return "Hello, User!";
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/api/admin")
-    public String admin() {
-        return "Hello, Admin!";
     }
 
 }
