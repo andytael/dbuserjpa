@@ -15,12 +15,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/user/api/v1")
 public class DbUserRepoController {
 
     final UserRepository userRepository;
@@ -31,19 +35,11 @@ public class DbUserRepoController {
     public record Userinfo (String username, String password) {
     }
 
-    @GetMapping("/ping")
-    public String ping() {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        System.out.println("DEBUG: /users Username : " + securityContext.getAuthentication().getName());
-        System.out.println("DEBUG: /users Authorities : " + securityContext.getAuthentication().getAuthorities());
-        System.out.println("DEBUG: /users Details : " + securityContext.getAuthentication().getDetails());
-        return "Ping Pong!";
-    }
 
     /* Connect
-    curl -i -u obaas-admin:password  http://localhost:8080/connect
+    curl -i -u obaas-admin:password  http://localhost:8080/user/api/v1/connect
 
-    http -a obaas-user:password :8080/connect
+    http -a obaas-user:password :8080/user/api/v1/connect
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/connect")
@@ -51,28 +47,43 @@ public class DbUserRepoController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    /* Get all users
-    curl -s -u obaas-admin:password  http://localhost:8080/users | jq
+    /* Find all users or users containing a username. If no param is provided all users are returned
 
-    http -a obaas-admin:password :8080/users
-    */
+    curl -i -u obaas-admin:password  http://localhost:8080/user/api/v1/findUser
+    curl -i -u obaas-admin:password  http://localhost:8080/user/api/v1/findUser\?username\=obaas-admin
+
+    http -a obaas-admin:password :8080/user/api/v1/findUser
+    http -a obaas-admin:password :8080/user/api/v1/findUser username==obaas-admin
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/users")
-    public List<Users> getAllUsers() {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        return userRepository.findAll();
+    @GetMapping("/findUser")
+    public ResponseEntity<List<Users>> getUsers(@RequestParam(required = false) String username) {
+        try {
+            List<Users> _users = new ArrayList<>();
+            if (username == null)
+                _users.addAll(userRepository.findAll());
+            else
+                _users.addAll(userRepository.findPhoneBooksByUsernameStartsWithIgnoreCase(username));
+            if (_users.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(_users, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /* Create user
     curl -u obaas-admin:password  -i -X POST \
       -H 'Content-Type: application/json' \
       -d '{"username": "Nisse", "password": "howdy", "roles" : "USER_ROLE"}' \
-      http://localhost:8080/user
+      http://localhost:8080/user/api/v1/createUser
 
-    http -a obaas-admin:password POST :8080/user username=anna password=bruno roles=USER_ROLE,ADMIN_ROLE
+    http -a obaas-admin:password POST :8080/user/api/v1/createUser username=anna password=bruno roles=USER_ROLE,ADMIN_ROLE
     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/user")
+    @PostMapping("/createUser")
     public ResponseEntity<Users> createUser(@RequestBody Users user, StandardPasswordEncoder encoder) {
         try {
             Users _user = userRepository.save(new Users(
@@ -91,12 +102,12 @@ public class DbUserRepoController {
     curl -u obaas-admin:password  -i -X PUT \
       -H 'Content-Type: application/json' \
       -d '{"username": "obaas-admin", "password": "newpassword"}' \
-      http://localhost:8080/userpwd
+      http://localhost:8080/user/api/v1/updatePassword
 
-    http -a obaas-admin:password PUT :8080/userpwd username=obaas-admin password=andy
+    http -a obaas-admin:password PUT :8080/user/api/v1/updatePassword username=obaas-admin password=andy
     */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PutMapping("/userpwd")
+    @PutMapping("/updatePassword")
     public ResponseEntity<Users> changePassword(@RequestBody Userinfo userInfo, StandardPasswordEncoder encoder) {
 
         // Check if the user is a user with ROLE_ADMIN
@@ -123,33 +134,60 @@ public class DbUserRepoController {
         }
     }
 
+    /* Delete a User by username
+    curl -u obaas-admin:password -i -X DELETE http://localhost:8080/deleteUsername/{username}
+
+    http -a obaas-admin:password DELETE :8080/user/api/v1/deleteUsername/{username}
+     */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/deleteUsername/{username}")
+    public ResponseEntity<HttpStatus> deleteUserByUsername(@PathVariable("username") String username) {
+        try {
+            System.out.println("uname :" + username);
+            Optional<Users> _user = userRepository.findByUsername(username);
+            System.out.println("id :" + _user.get().getUserId());
+            userRepository.deleteById(_user.get().getUserId());;
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 
     /* Delete a User By Id
-    curl -u obaas-admin:password -i -X DELETE http://localhost:8080/userid/{id}
+    curl -u obaas-admin:password -i -X DELETE http://localhost:8080/deleteId/{id}
 
-    http -a obaas-admin:password DELETE :8080/userid/4
+    http -a obaas-admin:password DELETE :8080/user/api/v1/userid/{id}
     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/userid/{id}")
+    @DeleteMapping("/deleteId/{id}")
     public ResponseEntity<HttpStatus> deleteUserById(@PathVariable("id") long id) {
         try {
             userRepository.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/api/pinguser")
+    @GetMapping("pinguser")
     public String pingSecureUser() {
         return "Secure User Ping Pong!";
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/api/pingadmin")
+    @GetMapping("pingadmin")
     public String pingSecureAdmin() {
         return "Secure Admin Ping Pong!";
     }
 
+    @GetMapping("ping")
+    public String ping() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        System.out.println("DEBUG: /users Username : " + securityContext.getAuthentication().getName());
+        System.out.println("DEBUG: /users Authorities : " + securityContext.getAuthentication().getAuthorities());
+        System.out.println("DEBUG: /users Details : " + securityContext.getAuthentication().getDetails());
+        return "Ping Pong!";
+    }
 }

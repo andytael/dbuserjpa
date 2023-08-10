@@ -29,3 +29,5 @@ spring:
     user: SYSTEM
     password: Welcome1234##
     enabled: ${LIQUIBASE_ENABLED:true}
+
+
