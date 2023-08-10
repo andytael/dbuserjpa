@@ -64,7 +64,7 @@ public class DbUserRepoController {
             if (username == null)
                 _users.addAll(userRepository.findAll());
             else
-                _users.addAll(userRepository.findPhoneBooksByUsernameStartsWithIgnoreCase(username));
+                _users.addAll(userRepository.findUsersByUsernameStartsWithIgnoreCase(username));
             if (_users.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
