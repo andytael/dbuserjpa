@@ -27,11 +27,15 @@ import java.util.Optional;
 @RequestMapping("/user/api/v1")
 public class DbUserRepoController {
 
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
     final UserRepository userRepository;
+
     public DbUserRepoController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    public record Userinfo (String username, String password) { }
+
+    public record Userinfo(String username, String password) {
+    }
 
     /* Connect
     curl -i -u obaas-admin:password  http://localhost:8080/user/api/v1/connect
@@ -40,7 +44,7 @@ public class DbUserRepoController {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/connect")
-    public ResponseEntity connect () {
+    public ResponseEntity connect() {
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -111,7 +115,7 @@ public class DbUserRepoController {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         boolean isAdminUser = false;
         for (GrantedAuthority role : securityContext.getAuthentication().getAuthorities()) {
-            if (role.getAuthority().contains("ROLE_ADMIN")) {
+            if (role.getAuthority().contains(ROLE_ADMIN)) {
                 isAdminUser = true;
             }
         }
@@ -140,9 +144,7 @@ public class DbUserRepoController {
     @DeleteMapping("/deleteUsername/{username}")
     public ResponseEntity<HttpStatus> deleteUserByUsername(@PathVariable("username") String username) {
         try {
-            System.out.println("uname :" + username);
             Optional<Users> _user = userRepository.findByUsername(username);
-            System.out.println("id :" + _user.get().getUserId());
             userRepository.deleteById(_user.get().getUserId());
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
@@ -167,27 +169,21 @@ public class DbUserRepoController {
         }
     }
 
-    /* Test method to see if a user has ROLE_USER
-
-     */
+    // Test method to see if a user has ROLE_USER
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/pinguser")
     public String pingSecureUser() {
         return "Secure User Ping Pong!";
     }
 
-    /* Test method to see if a user has ROLE_ADMIN
-
-     */
+    // Test method to see if a user has ROLE_ADMIN
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/pingadmin")
     public String pingSecureAdmin() {
         return "Secure Admin Ping Pong!";
     }
 
-    /* Open Method e.g no auth
-
-     */
+    // Open Method e.g no auth
     @GetMapping("/ping")
     public String ping() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
