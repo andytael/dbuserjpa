@@ -1,4 +1,4 @@
-package com.example.dbuserjpa;
+package oracle.spring.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

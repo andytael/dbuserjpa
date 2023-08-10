@@ -1,7 +1,7 @@
-package com.example.dbuserjpa.service;
+package oracle.spring.service.service;
 
-import com.example.dbuserjpa.model.SecurityUser;
-import com.example.dbuserjpa.repository.UserRepository;
+import oracle.spring.service.model.SecurityUser;
+import oracle.spring.service.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

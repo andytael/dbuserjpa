@@ -1,4 +1,4 @@
-package com.example.dbuserjpa.model;
+package oracle.spring.service.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

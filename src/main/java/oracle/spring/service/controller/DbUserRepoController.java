@@ -1,7 +1,7 @@
-package com.example.dbuserjpa.controller;
+package oracle.spring.service.controller;
 
-import com.example.dbuserjpa.model.Users;
-import com.example.dbuserjpa.repository.UserRepository;
+import oracle.spring.service.model.Users;
+import oracle.spring.service.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

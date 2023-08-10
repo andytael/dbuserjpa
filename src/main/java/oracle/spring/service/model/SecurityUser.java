@@ -1,4 +1,4 @@
-package com.example.dbuserjpa.model;
+package oracle.spring.service.model;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

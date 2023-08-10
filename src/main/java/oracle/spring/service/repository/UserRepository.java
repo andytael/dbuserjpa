@@ -1,6 +1,6 @@
-package com.example.dbuserjpa.repository;
+package oracle.spring.service.repository;
 
-import com.example.dbuserjpa.model.Users;
+import oracle.spring.service.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
