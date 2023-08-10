@@ -5,6 +5,8 @@ import com.example.dbuserjpa.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,13 +29,24 @@ public class DbUserRepoController {
 
     @GetMapping("/ping")
     public String ping() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        System.out.println("/users Username : " + securityContext.getAuthentication().getName());
+        System.out.println("/users Roles : " + securityContext.getAuthentication().getAuthorities());
         return "Ping Pong!";
     }
 
-    // Get all users
+    /* Get all users
+    curl -s -u obaas-admin:password  http://localhost:8080/users | jq
+
+    http -a obaas-admin:password :8080/users
+    */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/users")
     public List<Users> getAllUsers() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        System.out.println("/users Username : " + securityContext.getAuthentication().getName());
+        System.out.println("/users Authorities : " + securityContext.getAuthentication().getAuthorities());
+        System.out.println("/users Details : " + securityContext.getAuthentication().getDetails());
         return userRepository.findAll();
     }
 
@@ -42,6 +55,8 @@ public class DbUserRepoController {
       -H 'Content-Type: application/json' \
       -d '{"username": "Nisse", "password": "howdy", "roles" : "USER_ROLE"}' \
       http://localhost:8080/user
+
+    http -a obaas-admin:password POST :8080/user username=anna password=bruno roles=USER_ROLE,ADMIN_ROLE
     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/user")
@@ -60,7 +75,9 @@ public class DbUserRepoController {
     }
 
     /* Delete a User By Id
-    curl -u obaas-admin:password -i -X DELETE http://localhost:8080/user/{id}
+    curl -u obaas-admin:password -i -X DELETE http://localhost:8080/userid/{id}
+
+    http -a obaas-admin:password DELETE :8080/userid/4
     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/userid/{id}")
