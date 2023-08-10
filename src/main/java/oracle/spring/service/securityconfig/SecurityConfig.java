@@ -1,4 +1,4 @@
-package oracle.spring.service.config;
+package oracle.spring.service.securityconfig;
 
 import oracle.spring.service.service.JpaUserDetailsService;
 import org.springframework.context.annotation.Bean;
