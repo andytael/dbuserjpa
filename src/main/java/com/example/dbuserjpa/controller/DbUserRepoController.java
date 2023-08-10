@@ -2,6 +2,7 @@ package com.example.dbuserjpa.controller;
 
 import com.example.dbuserjpa.model.Users;
 import com.example.dbuserjpa.repository.UserRepository;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,10 +14,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class DbUserRepoController {
@@ -30,8 +33,8 @@ public class DbUserRepoController {
     @GetMapping("/ping")
     public String ping() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        System.out.println("/users Username : " + securityContext.getAuthentication().getName());
-        System.out.println("/users Roles : " + securityContext.getAuthentication().getAuthorities());
+        System.out.println("DEBUG: /users Username : " + securityContext.getAuthentication().getName());
+        System.out.println("DEBUG: /users Roles : " + securityContext.getAuthentication().getAuthorities());
         return "Ping Pong!";
     }
 
@@ -44,9 +47,9 @@ public class DbUserRepoController {
     @GetMapping("/users")
     public List<Users> getAllUsers() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        System.out.println("/users Username : " + securityContext.getAuthentication().getName());
-        System.out.println("/users Authorities : " + securityContext.getAuthentication().getAuthorities());
-        System.out.println("/users Details : " + securityContext.getAuthentication().getDetails());
+        System.out.println("DEBUG: /users Username : " + securityContext.getAuthentication().getName());
+        System.out.println("DEBUG: /users Authorities : " + securityContext.getAuthentication().getAuthorities());
+        System.out.println("DEBUG: /users Details : " + securityContext.getAuthentication().getDetails());
         return userRepository.findAll();
     }
 
@@ -69,6 +72,21 @@ public class DbUserRepoController {
                     user.getRoles()
             ));
             return new ResponseEntity<>(_user, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /* Change Password
+
+    */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/userpwd")
+    public ResponseEntity<Users> changePassword(@RequestBody String username, String password) {
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        try {
+            Optional<Users> _user = userRepository.findByUsername(username);
+
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
