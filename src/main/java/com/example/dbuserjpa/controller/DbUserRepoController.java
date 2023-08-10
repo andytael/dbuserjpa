@@ -28,13 +28,10 @@ import java.util.Optional;
 public class DbUserRepoController {
 
     final UserRepository userRepository;
-
     public DbUserRepoController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    public record Userinfo (String username, String password) {
-    }
-
+    public record Userinfo (String username, String password) { }
 
     /* Connect
     curl -i -u obaas-admin:password  http://localhost:8080/user/api/v1/connect
@@ -135,7 +132,7 @@ public class DbUserRepoController {
     }
 
     /* Delete a User by username
-    curl -u obaas-admin:password -i -X DELETE http://localhost:8080/deleteUsername/{username}
+    curl -u obaas-admin:password -i -X DELETE http://localhost:8080/user/api/v1/deleteUsername/{username}
 
     http -a obaas-admin:password DELETE :8080/user/api/v1/deleteUsername/{username}
      */
@@ -146,7 +143,7 @@ public class DbUserRepoController {
             System.out.println("uname :" + username);
             Optional<Users> _user = userRepository.findByUsername(username);
             System.out.println("id :" + _user.get().getUserId());
-            userRepository.deleteById(_user.get().getUserId());;
+            userRepository.deleteById(_user.get().getUserId());
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -155,9 +152,9 @@ public class DbUserRepoController {
     }
 
     /* Delete a User By Id
-    curl -u obaas-admin:password -i -X DELETE http://localhost:8080/deleteId/{id}
+    curl -u obaas-admin:password -i -X DELETE http://localhost:8080/user/api/v1/deleteId/{id}
 
-    http -a obaas-admin:password DELETE :8080/user/api/v1/userid/{id}
+    http -a obaas-admin:password DELETE :8080/user/api/v1/deleteId/{id}
     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/deleteId/{id}")
@@ -170,19 +167,28 @@ public class DbUserRepoController {
         }
     }
 
+    /* Test method to see if a user has ROLE_USER
+
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("pinguser")
+    @GetMapping("/pinguser")
     public String pingSecureUser() {
         return "Secure User Ping Pong!";
     }
 
+    /* Test method to see if a user has ROLE_ADMIN
+
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("pingadmin")
+    @GetMapping("/pingadmin")
     public String pingSecureAdmin() {
         return "Secure Admin Ping Pong!";
     }
 
-    @GetMapping("ping")
+    /* Open Method e.g no auth
+
+     */
+    @GetMapping("/ping")
     public String ping() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         System.out.println("DEBUG: /users Username : " + securityContext.getAuthentication().getName());
